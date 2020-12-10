@@ -1,0 +1,41 @@
+{% extends 'home/base.html'%}
+
+{%block title%}Laptops Here{%endblock%}
+
+{% block content%}
+<div class="row">
+    <div class="col-2 p-2">
+        <div class="bg-white p-4 h-100">
+            {% for title, items in filters.items %}
+            <h5 class="text-capitalize">{{title}}</h5>
+            <div class="ml-3">
+                {% for item in items %}
+                <h6><input type="checkbox">&nbsp;{{item}}</h6>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-10 p-2 h-100">
+        <div class="bg-white p-4">
+            <div class="row">
+                {% for product in products %}
+                <div class="col-md-3 mt-4">
+                    <div class="card h-100">
+                        <img class="card-img-top" height="110px" src="{{product.image_url}}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{product.name}}</h5>
+                            <small class="text-dark">{{product.price}}/-&nbsp;&middot;&nbsp;{{product.category}}&nbsp;&middot;&nbsp;{{product.brand}}&nbsp;&middot;&nbsp;{{product.processor}}&nbsp;&middot;&nbsp;{{product.ram}}&nbsp;&middot;&nbsp;{{product.storage}}</small>
+                            <a href="#" class="btn btn-primary mt-3">Add to cart</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+</script>
+{% endblock %}
