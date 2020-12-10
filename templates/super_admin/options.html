@@ -1,0 +1,84 @@
+{% extends 'super_admin/base.html'%}
+
+{%block title%}Laptops Here - Options {%endblock%}
+
+{% block content%}
+<div class="row">
+    {% for view, items in data.items %}
+    <div class="col-md-6">
+        <div class="m-4">
+            <h3 class="float-left text-capitalize">{{view}}</h3>
+            <button class="btn btn-primary float-right" onclick="create('{{view}}')">Create</button>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{forloop.counter}}</td>
+                    <td>{{item.name}}</td>
+                    <td>
+                        <a onclick="edit('{{view}}','{{item.id}}', '{{item.name}}')" class="edit" title="Edit">
+                            <i class="fa fa-pencil"></i>
+                        </a>&nbsp;
+                        <a href="/admin/options/{{view}}/delete/{{item.id}}" class="delete" title="Delete">
+                            <i Onclick="return confirm('Are you sure you want to delete  ?')" class="fa fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="modal fade" id="modal" tabindex="-1" role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="POST" id="modal-form" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="text" name="name" id='name' class="form-control" placeholder="Enter value here" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    function edit(view, id, name){
+        $('#modal').modal('show');
+        $('#modal-title').html('Edit '+view);
+        $('#name').val(name);
+        $('#modal-form').attr('action', '/admin/options/'+view+'/edit/'+id);
+    }
+
+    function create(view){
+        $('#modal').modal('show');
+        $('#modal-title').html('Create '+view);
+        $('#name').val('');
+        $('#modal-form').attr('action', '/admin/options/'+view+'/create/');
+    }
+
+
+</script>
+{% endblock %}

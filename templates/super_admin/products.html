@@ -1,0 +1,249 @@
+{% extends 'super_admin/base.html'%}
+
+{%block title%}Laptops Here - Products {%endblock%}
+
+{% block content%}
+<div>
+    <div class="row d-inline">
+        <h3 class="float-left">Products</h3>
+        <button onclick="create()" class="btn btn-primary float-right">Create</button>
+    </div>
+    <div class="row mt-5">
+        <table id="product-table" class="table table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Category</th>
+                <th>Brand</th>
+                <th>Processor</th>
+                <th>Ram</th>
+                <th>Storage</th>
+                <th>Image</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{forloop.counter}}</td>
+                <td>{{product.name}}</td>
+                <td>{{product.description}}</td>
+                <td>{{product.price}}</td>
+                <td>{{product.quantity}}</td>
+                <td>{{product.category.name}}</td>
+                <td>{{product.brand.name}}</td>
+                <td>{{product.processor.name}}</td>
+                <td>{{product.ram.name}}</td>
+                <td>{{product.storage.name}}</td>
+                <td><img class="product-image" style="height: 50px;width: 70px;" src="{{product.image_url}}"></td>
+                <td>
+                    <a onclick="edit('{{product.id}}','{{product.name}}','{{product.description}}','{{product.price}}',
+                    '{{product.quantity}}','{{product.category.id}}','{{product.brand.id}}','{{product.processor.id}}',
+                    '{{product.ram.id}}','{{product.storage.id}}','{{product.image_url}}')"
+                       class="edit" title="Edit">
+                        <i class="fa fa-pencil"></i>
+                    </a>&nbsp;
+                    <a href="/admin/products/delete/{{product.id}}" class="delete" title="Delete">
+                        <i Onclick="return confirm('Are you sure you want to delete  ?')" class="fa fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal fade" id="modal" tabindex="-1" role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-title">Create product</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="POST" id="modal-form" action="/admin/products/create/" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="text" name="name" id='name' class="form-control" placeholder="Enter name here"
+                               required>
+                    </div>
+                    <div class="form-group">
+                    <textarea name="description" id='description' class="form-control"
+                              placeholder="Enter description here" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <input type="number" name="price" id='price' class="form-control" placeholder="Enter price here"
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <input type="number" name="quantity" id='quantity' class="form-control"
+                               placeholder="Enter quantity here" required>
+                    </div>
+                    <div class="form-group">
+                        <select name="category" id="category" class="form-control" required>
+                            {% for category in categories %}
+                            <option value="{{category.id}}">{{category.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="brand" id="brand" class="form-control" required>
+                            {% for brand in brands %}
+                            <option value="{{brand.id}}">{{brand.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="processor" id="processor" class="form-control" required>
+                            {% for processor in processors %}
+                            <option value="{{processor.id}}">{{processor.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="ram" id="ram" class="form-control" required>
+                            {% for ram in rams %}
+                            <option value="{{ram.id}}">{{ram.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="storage" id="storage" class="form-control" required>
+                            {% for storage in storages %}
+                            <option value="{{storage.id}}">{{storage.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- result of cropped img -->
+                    <div class="form-group">
+                        <img id="cropped" style="height: 100px" class="cropped" src="">
+                    </div>
+
+                    <!-- button for adding img -->
+                    <div class="form-group">
+                        <button type="button" class="btn btn-warning w-100" class="form-control" id="img-button">Add
+                            image
+                        </button>
+                    </div>
+
+                    <!-- hidden field -->
+                    <input class="d-none" type="file" id="file-input">
+                    <textarea name="image_base64" class="d-none" id="image_base64"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="img-crop-modal" tabindex="-2" role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content bg-info">
+            <div class="modal-header">
+                <h5 class="modal-title text-white">Crop Image</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="box-2">
+                    <div class="result"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="btnCrop" class="btn save btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function() {
+     $('#product-table').DataTable();
+     $('.product-image[src=""]').hide();
+    });
+
+    function edit(id, name, description, price, quantity, category, brand, processor, ram ,storage, imageUrl) {
+        $('#modal').modal('show');
+        $('#name').val(name);
+        $('#description').val(description);
+        $('#price').val(price);
+        $('#quantity').val(quantity);   
+        $('#category').val(category);
+        $('#brand').val(brand);
+        $('#processor').val(processor);
+        $('#ram').val(ram);
+        $('#storage').val(storage);
+        cropped.src = imageUrl
+        $('#modal-form').attr('action', '/admin/products/edit/'+id);
+    }
+
+    function create(){
+        $('#modal').modal('show');
+        $('#modal').modal('show');
+        $('#name').val('');
+        $('#description').val('');
+        $('#price').val('');
+        $('#quantity').val('');
+        $('#category').val($("#category option:first").val());
+        $('#brand').val($("#brand option:first").val());
+        $('#processor').val($("#processor option:first").val());
+        $('#ram').val($("#ram option:first").val());
+        $('#storage').val($("#storage option:first").val());
+        cropped.src = ''
+        $('#modal-form').attr('action', '/admin/products/create/');
+    }
+
+    $("#img-button").click(function (e) {
+      $("#file-input").click();
+    });
+
+    let result = document.querySelector('.result'),
+    save = document.querySelector('.save'),
+    cropped = document.querySelector('.cropped'),
+    upload = document.querySelector('#file-input'),
+    cropper = '';
+
+    upload.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        // start file reader
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target.result) {
+            // create new image
+            $("#img-crop-modal").modal("show");
+            let img = document.createElement('img');
+            img.id = 'image';
+            img.src = e.target.result
+            // clean result before
+            result.innerHTML = '';
+            // append new image
+            result.appendChild(img);
+            // init cropper
+            cropper = new Cropper(img);
+          }
+        };
+        reader.readAsDataURL(e.target.files[0]);
+      }
+    });
+
+    save.addEventListener('click', (e) => {
+      e.preventDefault();
+      let imgSrc = cropper.getCroppedCanvas().toDataURL();
+      $("#img-crop-modal").modal("hide");
+      cropped.src = imgSrc;
+      $('#image_base64').val(imgSrc)
+    });
+</script>
+{% endblock %}
