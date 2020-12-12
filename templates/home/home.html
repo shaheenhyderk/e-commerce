@@ -1,6 +1,6 @@
 {% extends 'home/base.html'%}
 
-{%block title%}Laptops Here{%endblock%}
+{%block title%}Laptops Here - Home{%endblock%}
 
 {% block content%}
 <div class="row">
@@ -24,18 +24,22 @@
                     <div class="card h-100">
                         <img class="card-img-top" height="110px" src="{{product.image_url}}">
                         <div class="card-body">
-                            <h5 class="card-title">{{product.name}}</h5>
-                            <small class="text-dark">{{product.price}}/-&nbsp;&middot;&nbsp;{{product.category}}&nbsp;&middot;&nbsp;{{product.brand}}&nbsp;&middot;&nbsp;{{product.processor}}&nbsp;&middot;&nbsp;{{product.ram}}&nbsp;&middot;&nbsp;{{product.storage}}</small>
-                            <a href="#" class="btn btn-primary mt-3">Add to cart</a>
+                            <a href="{% url 'view_product' product.id %}" class="no-underline">
+                                <h5 class="card-title text-dark">{{product.name}}</h5>
+                                <small class="text-dark abc">{{product.category}}</small>&nbsp;&middot;&nbsp;
+                                <small class="text-dark">{{product.brand}}</small>&nbsp;&middot;&nbsp;
+                                <small class="text-dark">{{product.processor}}&nbsp;</small>&nbsp;&middot;&nbsp;
+                                <small class="text-dark">{{product.ram}}</small>&nbsp;&middot;&nbsp;
+                                <small class="text-dark">{{product.storage}}</small>&nbsp;&middot;&nbsp;
+                                <small class="text-dark">{{product.price}}/-</small>
+                            </a>
+                            <button onclick="addToCart('{{product.id}}')" class="btn btn-primary mt-3">Add to cart</button>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
-
     </div>
 </div>
-<script>
-</script>
 {% endblock %}

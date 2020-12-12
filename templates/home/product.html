@@ -1,0 +1,26 @@
+{% extends 'home/base.html'%}
+
+{%block title%}Laptops Here - Product{%endblock%}
+
+{% block content%}
+<div class="row mt-5 bg-white">
+    <div class="col-md-5">
+        <img src="{{product.image_url}}" height="250px" class="mt-5 mb-5">
+    </div>
+    <div class="col-md-7">
+        <div class="ml-5">
+            <h1>{{product.name}}</h1>
+            <br>
+            <span>Category - {{product.category}}</span><br>
+            <span>brand - {{product.brand}}</span><br>
+            <span>Processor - {{product.processor}}</span><br>
+            <span>Ram - {{product.ram}}</span><br>
+            <span>Storage - {{product.storage}}</span><br>
+            <br>
+            <h4 class="text-secondary">&nbsp;M.R.P- {{product.price}}/-</h4>
+            <p>&nbsp;{{product.description}}</p>
+            <button onclick="addToCart('{{product.id}}')" class="btn btn-primary">Add to cart</button>
+        </div>
+    </div>
+</div>
+{%endblock%}

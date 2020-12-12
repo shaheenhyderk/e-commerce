@@ -17,3 +17,9 @@ def home(request):
 
 def login(request):
     pass
+
+
+def view_product(request, id):
+    product = Product.objects.get(id=id)
+    context = {"product": product}
+    return render(request, 'home/product.html', context)
