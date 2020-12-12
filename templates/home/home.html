@@ -5,33 +5,41 @@
 {% block content%}
 <div class="row">
     <div class="col-2 p-2">
-        <div class="bg-white p-4 h-100">
+        <div class="bg-white p-3 h-100">
+            <h5 class="text-capitalize">Price</h5>
+            <div class="ml-3">
+                <div id="slider"></div>
+                <div class="d-flex justify-content-between">
+                    <span id="min-price"></span>
+                    <span id="max-price"></span>
+                </div>
+            </div>
             {% for title, items in filters.items %}
-            <h5 class="text-capitalize">{{title}}</h5>
+            <h5 class="text-capitalize mt-3">{{title}}</h5>
             <div class="ml-3">
                 {% for item in items %}
-                <h6><input type="checkbox">&nbsp;{{item}}</h6>
+                <h6><input type="checkbox" class="chk" value="{{title}}--{{item}}">&nbsp;{{item}}</h6>
                 {% endfor %}
             </div>
             {% endfor %}
         </div>
     </div>
-    <div class="col-10 p-2 h-100">
-        <div class="bg-white p-4">
+    <div class="col-10 p-2">
+        <div class="bg-white p-4 h-100">
             <div class="row">
                 {% for product in products %}
-                <div class="col-md-3 mt-4">
+                <div class="col-md-3 mt-4 card-col">
                     <div class="card h-100">
                         <img class="card-img-top" height="110px" src="{{product.image_url}}">
                         <div class="card-body">
                             <a href="{% url 'view_product' product.id %}" class="no-underline">
                                 <h5 class="card-title text-dark">{{product.name}}</h5>
-                                <small class="text-dark abc">{{product.category}}</small>&nbsp;&middot;&nbsp;
-                                <small class="text-dark">{{product.brand}}</small>&nbsp;&middot;&nbsp;
-                                <small class="text-dark">{{product.processor}}&nbsp;</small>&nbsp;&middot;&nbsp;
-                                <small class="text-dark">{{product.ram}}</small>&nbsp;&middot;&nbsp;
-                                <small class="text-dark">{{product.storage}}</small>&nbsp;&middot;&nbsp;
-                                <small class="text-dark">{{product.price}}/-</small>
+                                <small class="text-dark category">{{product.category}}</small>&nbsp;&middot;&nbsp;
+                                <small class="text-dark brand">{{product.brand}}</small>&nbsp;&middot;&nbsp;
+                                <small class="text-dark processor">{{product.processor}}</small>&nbsp;&middot;&nbsp;
+                                <small class="text-dark ram">{{product.ram}}</small>&nbsp;&middot;&nbsp;
+                                <small class="text-dark storage">{{product.storage}}</small>&nbsp;&middot;&nbsp;
+                                <small class="text-dark price">{{product.price}}/-</small>
                             </a>
                             <button onclick="addToCart('{{product.id}}')" class="btn btn-primary mt-3">Add to cart</button>
                         </div>
@@ -42,4 +50,75 @@
         </div>
     </div>
 </div>
+<script>
+    function filterProducts(){
+        var filters = {}
+        var showList = []
+        var hideList = []
+        var priceFilterValues = $( "#slider" ).slider( "option", "values" );
+        var minFilterPrice = priceFilterValues[0]
+        var maxFilterPrice = priceFilterValues[1]
+
+        $("input:checkbox[class=chk]:checked").each(function () {
+            var item = $(this).val().split("--");
+            if(filters.hasOwnProperty(item[0])){
+                filters[item[0]].push(item[1])
+            } else{
+                filters[item[0]]=[item[1]]
+            }
+        });
+
+        $('.card-col').each(function () {
+            showList.push($(this))
+            var productPrice = parseInt($(this).children().eq(0).children().eq(1).children().eq(0).children().filter('.price').html().split('/-')[0])
+            for (var key in filters) {
+                var option = $(this).children().eq(0).children().eq(1).children().eq(0).children().filter('.'+key).html()
+                if (!filters[key].includes(option)){
+                    hideList.push($(this))
+                }
+            }
+            if(productPrice<minFilterPrice || productPrice>maxFilterPrice){
+                hideList.push($(this))
+            }
+        });
+
+        showList.forEach(element => {
+            element.show()
+        });
+        hideList.forEach(element => {
+            element.hide()
+        });
+    }
+
+    $("input:checkbox[class=chk]").change(function() {
+        filterProducts()
+    });
+
+    $(document).ready(function() {
+        var minProductPrice=0 , maxProductPrice=0
+        $('.price').each(function () {
+            var price = parseInt($(this).html().split('/-')[0])
+            if (price > maxProductPrice){
+                maxProductPrice = price
+            }
+        })
+        maxProductPrice = Math.ceil(maxProductPrice/5000)*5000
+        $('#min-price').html(minProductPrice)
+        $('#max-price').html(maxProductPrice)
+        $( "#slider" ).slider({
+            min:minProductPrice,
+            max:maxProductPrice,
+            values: [ minProductPrice, maxProductPrice ],
+            step:5000,
+            range: true,
+            change: function( event, ui ) {
+                var priceValues = $( "#slider" ).slider( "option", "values" );
+                $('#min-price').html(priceValues[0])
+                $('#max-price').html(priceValues[1])
+                filterProducts()
+            }
+        });
+    })
+
+</script>
 {% endblock %}
