@@ -13,7 +13,7 @@
 </head>
 <body class="bg-light">
 <nav class="navbar navbar-expand-lg navbar-light bg-primary">
-    <a class="navbar-brand" href="#">Laptop Here</a>
+    <a class="navbar-brand text-white" href="#">Laptop Here</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -23,30 +23,26 @@
         <ul class="navbar-nav mr-auto">
             {% if request.user.is_authenticated %}
             <li class="nav-item">
-                <a class="nav-link" href="#"><strong>Profile</strong></a>
+                <a class="nav-link text-white" href="#"><strong>Profile</strong></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#"><strong>Cart</strong></a>
+                <a class="nav-link text-white" href="#"><strong>Cart</strong></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#"><strong>Orders</strong></a>
+                <a class="nav-link text-white" href="#"><strong>Orders</strong></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#"><strong>Log Out</strong></a>
+                <a class="nav-link text-white" href="{% url 'user_logout' %}"><strong>Log Out</strong></a>
             </li>
             {% else %}
             <li class="nav-item">
-                <a class="nav-link" href="#"><strong>Login</strong></a>
+                <a class="nav-link text-white" href="{% url 'user_login' %}"><strong>Login</strong></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#"><strong>Sign Up</strong></a>
+                <a class="nav-link text-white" href="{% url 'user_signup' %}"><strong>Sign Up</strong></a>
             </li>
             {% endif %}
         </ul>
-        <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-        </form>
     </div>
 </nav>
 <div class="container pt-5">
