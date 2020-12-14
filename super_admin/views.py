@@ -255,3 +255,12 @@ def delete_storage(request, id):
     storage = Storage.objects.get(id=id)
     storage.delete()
     return redirect(options)
+
+
+def get_users(request):
+    if 'isAdmin' not in request.session:
+        return redirect(login)
+    users = User.objects.filter(is_superuser=False)
+    context = {"users": users}
+    return render(request, 'super_admin/users.html', context)
+
