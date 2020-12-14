@@ -71,26 +71,26 @@
 
 <script type="text/javascript">
       $("#login").click(function () {
-        var userData = {
+        var data = {
           csrfmiddlewaretoken: "{{ csrf_token }}",
           username: $("#username").val(),
           password: $("#password").val(),
         };
-        if (userData.username == "") {
+        if (data.username == "") {
           console.log("username blank");
           $("#error").html("Please enter username");
-        } else if (userData.password == "") {
+        } else if (data.password == "") {
           $("#error").html("Please enter password");
         } else {
           $.ajax({
             url: "/admin/login/",
             type: "POST",
-            data: userData,
+            data: data,
             dataType: "json",
-            success: function (data) {
-              if (data == "valid") 
+            success: function (body) {
+              if (body.status == "valid")
                 window.location.replace("/admin/options/");
-              if (data == "invalid") {
+              if (body.status == "invalid") {
                 $("#error").html("invalid username/password");
                 $("#password").val("");
               }

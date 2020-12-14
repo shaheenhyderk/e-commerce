@@ -1,8 +1,8 @@
-{% extends 'home/base.html'%}
+{% extends 'home/base.html' %}
 
-{%block title%}Laptops Here - Home{%endblock%}
+{% block title %}Laptops Here - Login{% endblock %}
 
-{% block content%}
+{% block content %}
 <div class="d-flex justify-content-center align-items-center text-center">
     <div class="bg-white p-5 login-card">
         <div class="form-group">
@@ -18,29 +18,29 @@
 </div>
 <script>
     function login() {
-        var userData = {
+        var data = {
             csrfmiddlewaretoken: '{{ csrf_token }}',
             username: $('#username').val(),
             password: $('#password').val()
         }
-        if (userData.username == ''){
+        if (data.username == ''){
             $('#invalid').html('Please enter username')
-        } else if (userData.password == ''){
+        } else if (data.password == ''){
             $('#invalid').html('Please enter password')
         }
         else{
             $.ajax({
                 url : '/login/',
                 type: "POST",
-                data : userData,
+                data : data,
                 dataType : "json",
-                success: function( data ){
-                if(data == 'valid')
-                    window.location.replace("/")
-                if(data == 'invalid'){
-                    $('#error').html('Invalid Username/Password')
-                    $('#password').val('')
-                }
+                success: function( body ){
+                    if(body.status == 'valid')
+                        window.location.replace("/")
+                    if(body.status == 'invalid'){
+                        $('#error').html('Invalid Username/Password')
+                        $('#password').val('')
+                    }
                 }
             });
         }

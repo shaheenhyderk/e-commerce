@@ -1,8 +1,8 @@
-{% extends 'home/base.html'%}
+{% extends 'home/base.html' %}
 
-{%block title%}Laptops Here - Home{%endblock%}
+{% block title %}Laptops Here - Sign Up{% endblock %}
 
-{% block content%}
+{% block content %}
 <div class="d-flex justify-content-center align-items-center text-center">
     <div class="bg-white p-5 login-card">
         <div class="form-group">
@@ -27,7 +27,7 @@
 </div>
 <script>
     function signup() {
-        var userData = {
+        var data = {
             csrfmiddlewaretoken: '{{ csrf_token }}',
             name: $('#name').val(),
             username: $('#username').val(),
@@ -35,27 +35,27 @@
             password1: $('#password1').val(),
             password2: $('#password2').val()
         }
-        if (userData.name == ''){
+        if (data.name == ''){
             $('#error').html('Please enter your name')
-        }else if (userData.email == '') {
+        }else if (data.email == '') {
             $('#error').html('Please enter Email')
-        } else if (userData.username == '') {
+        } else if (data.username == '') {
             $('#error').html('Please enter username')
-        } else if (userData.password1 == '') {
+        } else if (data.password1 == '') {
         $('#error').html('Please enter password')
-        } else if (userData.password2 == '') {
+        } else if (data.password2 == '') {
         $('#error').html('Please confirm password')
         } else{
             $.ajax({
                 url : '/sign-up/',
                 type: "POST",
-                data : userData,
+                data : data,
                 dataType : "json",
-                success: function( data ){
-                    if(data == 'valid'){
+                success: function( body ){
+                    if(body.status == 'valid'){
                         window.location.replace("/login/")
                     } else{
-                        $('#error').html(data)
+                        $('#error').html(body.status)
                         $('#password1').val('')
                         $('#password2').val('')
                     }

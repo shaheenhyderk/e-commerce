@@ -17,9 +17,11 @@ def login(request):
         admin = auth.authenticate(username=username, password=password)
         if admin is not None and admin.is_superuser:
             request.session['isAdmin'] = True
-            return JsonResponse('valid', safe=False)
+            data = {'status': 'valid'}
+            return JsonResponse(data=data)
         else:
-            return JsonResponse('invalid', safe=False)
+            data = {'status': 'invalid'}
+            return JsonResponse(data=data)
     else:
         return render(request, 'super_admin/login.html')
 

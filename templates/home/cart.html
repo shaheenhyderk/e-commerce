@@ -1,0 +1,80 @@
+{% extends 'home/base.html' %}
+
+{% block title %}Laptops Here - Cart{% endblock %}
+
+{% block content %}
+<div class="d-inline">
+        <h3 class="float-left">Cart</h3>
+</div>
+<div class="mt-5">
+    <table id="product-table" class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+            <th>Remove</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for cart in carts %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{cart.product.name}}</td>
+            <td>{{cart.product.price}}</td>
+            <td>
+                <button class="btn btn-warning btn-sm" onClick="cartEdit('{{cart.id}}',-1)">-</button>
+                <span id="qty-{{cart.id}}">{{cart.quantity}}</span>
+                <button class="btn btn-warning btn-sm" onClick="cartEdit('{{cart.id}}',1)">+</button>
+            </td>
+            <td id="price-{{cart.id}}" class="tot-price">{{cart.total_price}}</td>
+            <td>
+                <a href="/cart/delete/{{cart.id}}" class="delete" title="Delete">
+                    <i Onclick="return confirm('Are you sure you want to delete  ?')" class="fa fa-trash text-danger"></i>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="float-right mt-4">
+        <h4 id="grand-total"></h4>
+        <a href="" class="btn btn-primary">Proceed to Checkout</a>
+    </div>
+</div>
+<script>
+    function cartEdit(id, value) {
+        if ((parseInt($('#qty-'+id).html())>1 && value == -1) || value == 1){
+            var data = {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                value: value
+            }
+            $.ajax({
+                url : '/cart/edit/'+ id,
+                type: "POST",
+                data : data,
+                dataType : "json",
+                success: function( body ){
+                    $('#qty-'+body.id).html(body.quantity)
+                    $('#price-'+body.id).html(body.total_price)
+                    cartTotal()
+                }
+            });
+        }
+    }
+
+    function cartTotal(){
+        grandTotal = 0
+        $('.tot-price').each(function () {
+            grandTotal += parseInt($(this).html());
+        })
+        $('#grand-total').html('Grand Total: '+grandTotal+'/-')
+    }
+
+    $(document).ready(function () {
+        cartTotal()
+    })
+</script>
+{% endblock %}

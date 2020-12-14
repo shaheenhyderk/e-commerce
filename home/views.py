@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
-from super_admin.models import Processor, Brand, Category, Ram, Storage, Product
+from super_admin.models import *
+from .models import *
 from django.contrib.auth.models import auth, User
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+import json
 
 
 # Create your views here.
@@ -27,9 +29,11 @@ def login(request):
 
         if user is not None:
             auth.login(request, user)
-            return JsonResponse('valid', safe=False)
+            data = {'status': 'valid'}
+            return JsonResponse(data=data)
         else:
-            return JsonResponse('invalid', safe=False)
+            data = {'status': 'invalid'}
+            return JsonResponse(data=data)
     else:
         return render(request, 'home/login.html')
 
@@ -47,14 +51,18 @@ def signup(request):
 
         if password1 == password2:
             if User.objects.filter(username=username).exists():
-                return JsonResponse('Username already used', safe=False)
+                data = {'status': 'Username already used'}
+                return JsonResponse(data=data)
             elif User.objects.filter(email=email).exists():
-                return JsonResponse('Email Already used', safe=False)
+                data = {'status': 'Email Already used'}
+                return JsonResponse(data=data)
             else:
                 User.objects.create_user(first_name=name, username=username, email=email, password=password1)
-            return JsonResponse('valid', safe=False)
+                data = {'status': 'valid'}
+                return JsonResponse(data=data)
         else:
-            return JsonResponse('Password mismatch', safe=False)
+            data = {'status': 'Password mismatch'}
+            return JsonResponse(data=data)
     else:
         return render(request, 'home/signup.html')
 
@@ -69,3 +77,110 @@ def view_product(request, id):
     product = Product.objects.get(id=id)
     context = {"product": product}
     return render(request, 'home/product.html', context)
+
+
+def view_cart(request):
+    if request.user.is_authenticated:
+        user = request.user
+        if 'cart' in request.COOKIES:
+            cart_cookie = json.loads(request.COOKIES['cart'])
+            create_cart = []
+            existing_cart = Cart.objects.filter(user=user)
+            for pro_id, qty in cart_cookie.items():
+                product = Product.objects.get(id=int(pro_id))
+                if not any(x.product == product for x in existing_cart):
+                    create_cart.append(Cart(user=user, product=product, quantity=qty))
+            Cart.objects.bulk_create(create_cart)
+        carts = Cart.objects.filter(user=user)
+        context = {"carts": carts}
+        response = render(request, 'home/cart.html', context)
+        response.delete_cookie('cart')
+        return response
+    else:
+        cart_cookie = {}
+        if 'cart' in request.COOKIES:
+            cart_cookie = json.loads(request.COOKIES['cart'])
+        carts = []
+        for pro_id, qty in cart_cookie.items():
+            cart = Cart()
+            cart.product = Product.objects.get(id=int(pro_id))
+            cart.id = cart.product.id
+            cart.quantity = qty
+            carts.append(cart)
+        context = {"carts": carts}
+        return render(request, 'home/cart.html', context)
+
+
+def add_to_cart(request, id):
+    if request.user.is_authenticated:
+        user = request.user
+        if 'cart' in request.COOKIES:
+            cart_cookie = json.loads(request.COOKIES['cart'])
+            create_cart = []
+            existing_cart = Cart.objects.filter(user=user)
+            for pro_id, qty in cart_cookie.items():
+                product = Product.objects.get(id=int(pro_id))
+                if not any(x.product == product for x in existing_cart):
+                    create_cart.append(Cart(user=user, product=product, quantity=qty))
+            Cart.objects.bulk_create(create_cart)
+        product = Product.objects.get(id=id)
+        if Cart.objects.filter(user=user, product=product).exists():
+            cart = Cart.objects.get(user=user, product=product)
+            cart.quantity += 1
+            cart.save()
+        else:
+            Cart.objects.create(user=user, product=product, quantity=1)
+        data = {"status": "done"}
+        response = JsonResponse(data=data)
+        response.delete_cookie('cart')
+        return response
+    else:
+        data = {"status": "done"}
+        response = JsonResponse(data=data)
+        cart_cookie = {id: 1}
+        if 'cart' in request.COOKIES:
+            cart_cookie = json.loads(request.COOKIES['cart'])
+            if str(id) in cart_cookie:
+                cart_cookie[str(id)] += 1
+            else:
+                cart_cookie[id] = 1
+        response.set_cookie("cart", json.dumps(cart_cookie))
+        return response
+
+
+def cart_edit(request, id):
+    if request.user.is_authenticated:
+        user = request.user
+        value = int(request.POST['value'])
+        cart = Cart.objects.get(user=user, id=id)
+        cart.quantity += value
+        cart.save()
+        data = {'id': id, 'quantity': cart.quantity, 'total_price': cart.total_price}
+        return JsonResponse(data=data)
+    else:
+        if 'cart' in request.COOKIES:
+            value = int(request.POST['value'])
+            cart_cookie = json.loads(request.COOKIES['cart'])
+            if str(id) in cart_cookie:
+                cart_cookie[str(id)] += value
+                quantity = cart_cookie[str(id)]
+                product = Product.objects.get(id=id)
+                data = {'id': id, 'quantity': quantity, 'total_price': quantity * product.price}
+                response = JsonResponse(data=data)
+                response.set_cookie("cart", json.dumps(cart_cookie))
+                return response
+
+
+def cart_delete(request, id):
+    if request.user.is_authenticated:
+        user = request.user
+        Cart.objects.get(user=user, id=id).delete()
+        return redirect(view_cart)
+    else:
+        if 'cart' in request.COOKIES:
+            cart_cookie = json.loads(request.COOKIES['cart'])
+            if str(id) in cart_cookie:
+                cart_cookie.pop(str(id))
+                response = redirect(view_cart)
+                response.set_cookie("cart", json.dumps(cart_cookie))
+                return response

@@ -1,8 +1,8 @@
-{% extends 'home/base.html'%}
+{% extends 'home/base.html' %}
 
-{%block title%}Laptops Here - Product{%endblock%}
+{% block title %}Laptops Here - {{product.name}}{% endblock %}
 
-{% block content%}
+{% block content %}
 <div class="row mt-5 bg-white">
     <div class="col-md-5">
         <img src="{{product.image_url}}" height="250px" class="mt-5 mb-5">
@@ -23,4 +23,4 @@
         </div>
     </div>
 </div>
-{%endblock%}
+{% endblock %}

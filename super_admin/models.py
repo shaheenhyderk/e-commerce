@@ -38,8 +38,8 @@ class Storage(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=20)
-    description = models.TextField(max_length=5000)
+    name = models.CharField(max_length=100)
+    description = models.TextField()
     price = models.IntegerField()
     quantity = models.IntegerField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)

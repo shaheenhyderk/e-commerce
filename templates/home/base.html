@@ -3,17 +3,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{%block title%} {%endblock%}</title>
+    <title>{% block title %} {% endblock %}</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+        integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href=" {%static 'home/home.css'%} "/>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+
     <script src="{%static 'super_admin/vendor/jquery/jquery.min.js'%}"></script>
     <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 </head>
 <body class="bg-light">
 <nav class="navbar navbar-expand-lg navbar-light bg-primary">
-    <a class="navbar-brand text-white" href="#">Laptop Here</a>
+    <a class="navbar-brand text-white" href="{% url 'home' %}">Laptop Here</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -21,15 +24,18 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link text-white" href="{% url 'home' %}"><strong>Home</strong></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="{% url 'cart' %}"><strong>Cart</strong></a>
+            </li>
             {% if request.user.is_authenticated %}
             <li class="nav-item">
-                <a class="nav-link text-white" href="#"><strong>Profile</strong></a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white" href="#"><strong>Cart</strong></a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link text-white" href="#"><strong>Orders</strong></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="#"><strong>Profile</strong></a>
             </li>
             <li class="nav-item">
                 <a class="nav-link text-white" href="{% url 'user_logout' %}"><strong>Log Out</strong></a>
@@ -55,9 +61,27 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-notify@3.1.3/bootstrap-notify.min.js"></script>
 
 <script>
-    function addToCart(id) {}
+    function addToCart(id) {
+        var data = {
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        }
+        $.ajax({
+            url : '/add-cart/'+ id,
+            type: "POST",
+            data : data,
+            dataType : "json",
+            success: function( body ){
+                $.notify("Added successfully", {align:"center", verticalAlign:"top", background: "#20D67B"});
+            },
+            error: function (request, status, error) {
+                $.notify("Something went wrong", {color: "#fff", background: "#D44950"});
+            }
+
+        });
+    }
 </script>
 
 </body>

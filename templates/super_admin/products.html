@@ -1,61 +1,59 @@
-{% extends 'super_admin/base.html'%}
+{% extends 'super_admin/base.html' %}
 
-{%block title%}Laptops Here - Products {%endblock%}
+{% block title %}Laptops Here - Products {% endblock %}
 
-{% block content%}
-<div>
-    <div class="row d-inline">
-        <h3 class="float-left">Products</h3>
-        <button onclick="create()" class="btn btn-primary float-right">Create</button>
-    </div>
-    <div class="row mt-5">
-        <table id="product-table" class="table table-striped">
-            <thead>
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Category</th>
-                <th>Brand</th>
-                <th>Processor</th>
-                <th>Ram</th>
-                <th>Storage</th>
-                <th>Image</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for product in products %}
-            <tr>
-                <td>{{forloop.counter}}</td>
-                <td>{{product.name}}</td>
-                <td>{{product.description}}</td>
-                <td>{{product.price}}</td>
-                <td>{{product.quantity}}</td>
-                <td>{{product.category.name}}</td>
-                <td>{{product.brand.name}}</td>
-                <td>{{product.processor.name}}</td>
-                <td>{{product.ram.name}}</td>
-                <td>{{product.storage.name}}</td>
-                <td><img class="product-image" style="height: 50px;width: 70px;" src="{{product.image_url}}"></td>
-                <td>
-                    <a onclick="edit('{{product.id}}','{{product.name}}','{{product.description}}','{{product.price}}',
-                    '{{product.quantity}}','{{product.category.id}}','{{product.brand.id}}','{{product.processor.id}}',
-                    '{{product.ram.id}}','{{product.storage.id}}','{{product.image_url}}')"
-                       class="edit" title="Edit">
-                        <i class="fa fa-pencil"></i>
-                    </a>&nbsp;
-                    <a href="/admin/products/delete/{{product.id}}" class="delete" title="Delete">
-                        <i Onclick="return confirm('Are you sure you want to delete  ?')" class="fa fa-trash"></i>
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
+{% block content %}
+<div class="d-inline">
+    <h3 class="float-left">Products</h3>
+    <button onclick="create()" class="btn btn-primary float-right">Create</button>
+</div>
+<div class="mt-5">
+    <table id="product-table" class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Category</th>
+            <th>Brand</th>
+            <th>Processor</th>
+            <th>Ram</th>
+            <th>Storage</th>
+            <th>Image</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{product.name}}</td>
+            <td>{{product.description}}</td>
+            <td>{{product.price}}</td>
+            <td>{{product.quantity}}</td>
+            <td>{{product.category.name}}</td>
+            <td>{{product.brand.name}}</td>
+            <td>{{product.processor.name}}</td>
+            <td>{{product.ram.name}}</td>
+            <td>{{product.storage.name}}</td>
+            <td><img class="product-image" style="height: 50px;width: 70px;" src="{{product.image_url}}"></td>
+            <td>
+                <a onclick="edit('{{product.id}}','{{product.name}}','{{product.description}}','{{product.price}}',
+                '{{product.quantity}}','{{product.category.id}}','{{product.brand.id}}','{{product.processor.id}}',
+                '{{product.ram.id}}','{{product.storage.id}}','{{product.image_url}}')"
+                    class="edit" title="Edit">
+                    <i class="fa fa-pencil"></i>
+                </a>&nbsp;
+                <a href="/admin/products/delete/{{product.id}}" class="delete" title="Delete">
+                    <i Onclick="return confirm('Are you sure you want to delete  ?')" class="fa fa-trash text-danger"></i>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
 <div class="modal fade" id="modal" tabindex="-1" role="dialog"
      aria-hidden="true">
