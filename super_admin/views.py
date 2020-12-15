@@ -58,7 +58,7 @@ def create_product(request):
         processor_id = request.POST['processor']
         ram_id = request.POST['ram']
         storage_id = request.POST['storage']
-        image_data_id = request.POST['image_base64']
+        image_data = request.POST['image_base64']
         if image_data is not '':
             format, img_str = image_data.split(';base64,')
             ext = format.split('/')[-1]
