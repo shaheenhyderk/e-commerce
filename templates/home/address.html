@@ -1,0 +1,29 @@
+{% extends 'home/base.html' %}
+
+{% block title %}Laptops Here - Address{% endblock %}
+
+{% block content %}
+<div class="p-5 bg-white">
+    <div class="d-inline">
+        <h3 class="float-left">Address</h3>
+        <a href="{% url 'create_address' %}" class="btn btn-primary float-right">Create</a>
+    </div>
+    <div class="row container mt-5">
+        {% for address in addresses %}
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{address.name}}</h5>
+                    <span class="card-title text-secondary">{{address.email}}</span>
+                    <span class="card-title text-secondary">{{address.phone}}</span>
+                    <small>{{address.city}}&nbsp;&middot;&nbsp;{{address.state}}&nbsp;&middot;&nbsp;{{address.pin_code}}</small>
+                    <p class="card-text">{{address.address}}</p>
+                    <a href="#" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="#" Onclick="return confirm('Are you sure you want to delete ?')" class="btn btn-danger btn-sm">Remove</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from super_admin.models import *
 from .models import *
+from .forms import *
 from django.contrib.auth.models import auth, User
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 import json
 
 
@@ -71,6 +72,37 @@ def logout(request):
     if request.user.is_authenticated:
         auth.logout(request)
         return redirect(home)
+
+
+def view_profile(request):
+    if not request.user.is_authenticated:
+        return redirect(login)
+    return render(request, 'home/profile.html')
+
+
+def view_address(request):
+    if not request.user.is_authenticated:
+        return redirect(login)
+    user = request.user
+    addresses = Address.objects.filter(user=user)
+    context = {"addresses": addresses}
+    return render(request, 'home/address.html', context)
+
+
+def create_address(request):
+    if not request.user.is_authenticated:
+        return redirect(login)
+    if request.method == 'POST':
+        user = request.user
+        form = AddressForm(request.POST)
+        address = form.save(commit=False)
+        address.user = user
+        address.save()
+        return redirect('user_address')
+    else:
+        form = AddressForm()
+        context = {"form": form}
+        return render(request, 'home/create_address.html', context)
 
 
 def view_product(request, id):

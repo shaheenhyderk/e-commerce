@@ -1,0 +1,14 @@
+{% extends 'home/base.html' %}
+
+{% block title %}Laptops Here - Create Address{% endblock %}
+
+{% block content %}
+<div class="p-5 bg-white">
+    <h3>Create Address</h3>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit" class="save btn btn-primary">Save</button>
+    </form>
+</div>
+{% endblock %}
