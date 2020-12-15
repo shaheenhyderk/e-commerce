@@ -1,3 +1,4 @@
+from django.db.models import F
 from django.shortcuts import render, redirect
 from super_admin.models import *
 from .models import *
@@ -120,9 +121,8 @@ def view_cart(request):
             create_carts = []
             existing_carts = Cart.objects.filter(user=user)
             for pro_id, qty in cart_cookie.items():
-                product = Product.objects.get(id=int(pro_id))
-                if not any(x.product == product for x in existing_carts):
-                    create_carts.append(Cart(user=user, product=product, quantity=qty))
+                if not any(x.product_id == int(pro_id) for x in existing_carts):
+                    create_carts.append(Cart(user=user, product_id=int(pro_id), quantity=qty))
             Cart.objects.bulk_create(create_carts)
         carts = Cart.objects.filter(user=user)
         context = {"carts": carts}
@@ -135,11 +135,7 @@ def view_cart(request):
             cart_cookie = json.loads(request.COOKIES['cart'])
         carts = []
         for pro_id, qty in cart_cookie.items():
-            cart = Cart()
-            cart.product = Product.objects.get(id=int(pro_id))
-            cart.id = cart.product.id
-            cart.quantity = qty
-            carts.append(cart)
+            carts.append(Cart(id=int(pro_id), quantity=qty, product_id=pro_id))
         context = {"carts": carts}
         return render(request, 'home/cart.html', context)
 
@@ -152,15 +148,12 @@ def add_to_cart(request, id):
             create_cart = []
             existing_cart = Cart.objects.filter(user=user)
             for pro_id, qty in cart_cookie.items():
-                product = Product.objects.get(id=int(pro_id))
-                if not any(x.product == product for x in existing_cart):
-                    create_cart.append(Cart(user=user, product=product, quantity=qty))
+                if not any(x.product_id == int(pro_id) for x in existing_cart):
+                    create_cart.append(Cart(user=user, product_id=int(pro_id), quantity=qty))
             Cart.objects.bulk_create(create_cart)
         product = Product.objects.get(id=id)
         if Cart.objects.filter(user=user, product=product).exists():
-            cart = Cart.objects.get(user=user, product=product)
-            cart.quantity += 1
-            cart.save()
+            Cart.objects.filter(user=user, product=product).update(quantity=F('quantity') + 1)
         else:
             Cart.objects.create(user=user, product=product, quantity=1)
         data = {"status": "done"}
@@ -220,34 +213,34 @@ def cart_delete(request, id):
 
 
 def checkout(request):
-    if request.user.is_authenticated:
-        if request.method == 'POST':
-            user = request.user
-            payment_mode = int(request.POST['paymentMode'])
-            address_id = request.POST['addressId']
-            address = Address.objects.get(id=address_id)
-            carts = Cart.objects.filter(user=user)
-            paid = payment_mode != 1
-            tid = uuid4()
-            orders = []
-            products = []
-            for cart in carts:
-                orders.append(Order(user=user, address=address, product=cart.product, quantity=cart.quantity,
-                                    product_total=cart.product_total, tid=tid, paid=paid,
-                                    order_status=Order.ORDER_PLACED, payment_mode=Order.PAYMENT_COD))
-                cart.product.quantity -= 1
-                products.append(cart.product)
-            Order.objects.bulk_create(orders)
-            Product.objects.bulk_update(products, ['quantity'])
-            carts.delete()
-            data = {'status': 'success'}
-            return JsonResponse(data=data)
-        else:
-            user = request.user
-            addresses = Address.objects.filter(user=user)
-            carts = Cart.objects.filter(user=user)
-            total_amount = 0
-            for cart in carts:
-                total_amount += cart.product_total
-            context = {"addresses": addresses, "carts": carts, "total_amount": total_amount}
-            return render(request, 'home/checkout.html', context)
+    if not request.user.is_authenticated:
+        return redirect(login)
+    if request.method == 'POST':
+        user = request.user
+        payment_mode = int(request.POST['paymentMode'])
+        address_id = request.POST['addressId']
+        carts = Cart.objects.filter(user=user)
+        paid = payment_mode != 1
+        tid = uuid4()
+        orders = []
+        products = []
+        for cart in carts:
+            orders.append(Order(user=user, address_id=address_id, product=cart.product, quantity=cart.quantity,
+                                product_total=cart.product_total, tid=tid, paid=paid,
+                                order_status=Order.ORDER_PLACED, payment_mode=Order.PAYMENT_COD))
+            cart.product.quantity -= 1
+            products.append(cart.product)
+        Order.objects.bulk_create(orders)
+        Product.objects.bulk_update(products, ['quantity'])
+        carts.delete()
+        data = {'status': 'success'}
+        return JsonResponse(data=data)
+    else:
+        user = request.user
+        addresses = Address.objects.filter(user=user)
+        carts = Cart.objects.filter(user=user)
+        total_amount = 0
+        for cart in carts:
+            total_amount += cart.product_total
+        context = {"addresses": addresses, "carts": carts, "total_amount": total_amount}
+        return render(request, 'home/checkout.html', context)

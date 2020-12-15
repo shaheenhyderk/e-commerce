@@ -7,7 +7,6 @@ from django.core.files.base import ContentFile
 
 
 # Create your views here.
-
 def login(request):
     if 'isAdmin' in request.session:
         return redirect(options)
@@ -54,12 +53,12 @@ def create_product(request):
         description = request.POST['description']
         price = request.POST['price']
         quantity = request.POST['quantity']
-        category = Category.objects.get(id=request.POST['category'])
-        brand = Brand.objects.get(id=request.POST['brand'])
-        processor = Processor.objects.get(id=request.POST['processor'])
-        ram = Ram.objects.get(id=request.POST['ram'])
-        storage = Storage.objects.get(id=request.POST['storage'])
-        image_data = request.POST['image_base64']
+        category_id = request.POST['category']
+        brand_id = request.POST['brand']
+        processor_id = request.POST['processor']
+        ram_id = request.POST['ram']
+        storage_id = request.POST['storage']
+        image_data_id = request.POST['image_base64']
         if image_data is not '':
             format, img_str = image_data.split(';base64,')
             ext = format.split('/')[-1]
@@ -67,8 +66,9 @@ def create_product(request):
         else:
             image = None
 
-        Product.objects.create(name=name, description=description, price=price, quantity=quantity, category=category,
-                               brand=brand, processor=processor, ram=ram, storage=storage, image=image)
+        Product.objects.create(name=name, description=description, price=price, quantity=quantity,
+                               category_id=category_id, brand_id=brand_id, processor_id=processor_id, ram_id=ram_id,
+                               storage_id=storage_id, image=image)
         return redirect(products)
 
 
@@ -81,11 +81,11 @@ def edit_product(request, id):
         product.description = request.POST['description']
         product.price = request.POST['price']
         product.quantity = request.POST['quantity']
-        product.category = Category.objects.get(id=request.POST['category'])
-        product.brand = Brand.objects.get(id=request.POST['brand'])
-        product.processor = Processor.objects.get(id=request.POST['processor'])
-        product.ram = Ram.objects.get(id=request.POST['ram'])
-        product.storage = Storage.objects.get(id=request.POST['storage'])
+        product.category_id = request.POST['category']
+        product.brand_id = request.POST['brand']
+        product.processor_id = request.POST['processor']
+        product.ram_id = request.POST['ram']
+        product.storage_id = request.POST['storage']
         image_data = request.POST['image_base64']
 
         if image_data is not '':
@@ -263,4 +263,3 @@ def get_users(request):
     users = User.objects.filter(is_superuser=False)
     context = {"users": users}
     return render(request, 'super_admin/users.html', context)
-
