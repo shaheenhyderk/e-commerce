@@ -5,6 +5,7 @@ from .forms import *
 from django.contrib.auth.models import auth, User
 from django.http import JsonResponse
 import json
+from uuid import uuid4
 
 
 # Create your views here.
@@ -116,13 +117,13 @@ def view_cart(request):
         user = request.user
         if 'cart' in request.COOKIES:
             cart_cookie = json.loads(request.COOKIES['cart'])
-            create_cart = []
-            existing_cart = Cart.objects.filter(user=user)
+            create_carts = []
+            existing_carts = Cart.objects.filter(user=user)
             for pro_id, qty in cart_cookie.items():
                 product = Product.objects.get(id=int(pro_id))
-                if not any(x.product == product for x in existing_cart):
-                    create_cart.append(Cart(user=user, product=product, quantity=qty))
-            Cart.objects.bulk_create(create_cart)
+                if not any(x.product == product for x in existing_carts):
+                    create_carts.append(Cart(user=user, product=product, quantity=qty))
+            Cart.objects.bulk_create(create_carts)
         carts = Cart.objects.filter(user=user)
         context = {"carts": carts}
         response = render(request, 'home/cart.html', context)
@@ -187,7 +188,7 @@ def cart_edit(request, id):
         cart = Cart.objects.get(user=user, id=id)
         cart.quantity += value
         cart.save()
-        data = {'id': id, 'quantity': cart.quantity, 'total_price': cart.total_price}
+        data = {'id': id, 'quantity': cart.quantity, 'product_total': cart.product_total}
         return JsonResponse(data=data)
     else:
         if 'cart' in request.COOKIES:
@@ -197,7 +198,7 @@ def cart_edit(request, id):
                 cart_cookie[str(id)] += value
                 quantity = cart_cookie[str(id)]
                 product = Product.objects.get(id=id)
-                data = {'id': id, 'quantity': quantity, 'total_price': quantity * product.price}
+                data = {'id': id, 'quantity': quantity, 'product_total': quantity * product.price}
                 response = JsonResponse(data=data)
                 response.set_cookie("cart", json.dumps(cart_cookie))
                 return response
@@ -216,3 +217,37 @@ def cart_delete(request, id):
                 response = redirect(view_cart)
                 response.set_cookie("cart", json.dumps(cart_cookie))
                 return response
+
+
+def checkout(request):
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            user = request.user
+            payment_mode = int(request.POST['paymentMode'])
+            address_id = request.POST['addressId']
+            address = Address.objects.get(id=address_id)
+            carts = Cart.objects.filter(user=user)
+            paid = payment_mode != 1
+            tid = uuid4()
+            orders = []
+            products = []
+            for cart in carts:
+                orders.append(Order(user=user, address=address, product=cart.product, quantity=cart.quantity,
+                                    product_total=cart.product_total, tid=tid, paid=paid,
+                                    order_status=Order.ORDER_PLACED, payment_mode=Order.PAYMENT_COD))
+                cart.product.quantity -= 1
+                products.append(cart.product)
+            Order.objects.bulk_create(orders)
+            Product.objects.bulk_update(products, ['quantity'])
+            carts.delete()
+            data = {'status': 'success'}
+            return JsonResponse(data=data)
+        else:
+            user = request.user
+            addresses = Address.objects.filter(user=user)
+            carts = Cart.objects.filter(user=user)
+            total_amount = 0
+            for cart in carts:
+                total_amount += cart.product_total
+            context = {"addresses": addresses, "carts": carts, "total_amount": total_amount}
+            return render(request, 'home/checkout.html', context)

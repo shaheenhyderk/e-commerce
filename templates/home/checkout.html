@@ -1,0 +1,106 @@
+{% extends 'home/base.html' %}
+
+{% block title %}Laptops Here - Create Address{% endblock %}
+
+{% block content %}
+<div class="p-4 bg-white">
+    <h3>Checkout</h3>
+    <div class="container">
+        <h4 class="mt-4">Select Address</h4>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="row">
+                    {% for address in addresses %}
+                    <div class="col-md-6">
+                        <div class="card" id='card-{{address.id}}'>
+                            <div class="card-body">
+                                <h5 class="card-title">{{address.name}}</h5>
+                                <span class="card-title text-secondary">{{address.email}}</span><br>
+                                <span class="card-title text-secondary">{{address.phone}}</span><br>
+                                <small>{{address.city}}&nbsp;&middot;&nbsp;{{address.state}}&nbsp;&middot;&nbsp;{{address.pin_code}}</small>
+                                <p class="card-text">{{address.address}}</p>
+                                <button onclick="selectAddress('{{address.id}}')" class="btn btn-primary btn-sm">Select</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <table id="product-table" class="table table-striped">
+                    <tbody>
+                        <tr>
+                            <th>Products</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                        </tr>
+                        {% for cart in carts %}
+                        <tr>
+                            <td>{{cart.product.name}}</td>
+                            <td>{{cart.quantity}}</td>
+                            <td>{{cart.product_total}}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <th></th>
+                            <th>Total</th>
+                            <th>{{total_amount}}</th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="container" id="payment-container" style="display: none">
+        <h4 class="mt-4">Select Payment</h4>
+        <div id="paypal-button-container" class="mt-4"></div>
+        <button class="btn btn-primary mt-4 w-75" onclick="placeOrder(PAYMENT_COD)">Pay as COD</button>
+    </div>
+</div>
+<script src="https://www.paypal.com/sdk/js?client-id=Ab0mYA7ky_A0TrS06BPFrHBN7lfYVZfAhjzHLOQoULvAoYTcLvXncymi-oglo4_jbXXs9uzAZGeYDWXI&currency=USD"></script>
+<script>
+    var selectedAddressId
+    const PAYMENT_COD = 1
+    const PAYMENT_PAYPAL = 2
+    function selectAddress(id) {
+        selectedAddressId = id
+        $('.card').removeClass('bg-light')
+        $('#card-'+id).addClass('bg-light')
+        $('#payment-container').show()
+    }
+    paypal.Buttons({
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: '{{total_amount}}'
+                    }
+                }]
+            });
+        },
+
+        onApprove: function(data, actions) {
+            placeOrder(PAYMENT_PAYPAL)
+        }
+    }).render('#paypal-button-container');
+
+    function placeOrder(paymentMode){
+        var data = {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                paymentMode : paymentMode,
+                addressId : selectedAddressId
+            }
+        $.ajax({
+            url : '{% url 'checkout' %}',
+            type: "POST",
+            data : data,
+            dataType : "json",
+            success: function(body){
+                if (body.status == 'success'){
+                    window.location.replace("/")
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

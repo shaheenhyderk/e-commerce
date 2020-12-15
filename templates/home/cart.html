@@ -29,7 +29,7 @@
                 <span id="qty-{{cart.id}}">{{cart.quantity}}</span>
                 <button class="btn btn-warning btn-sm" onClick="cartEdit('{{cart.id}}',1)">+</button>
             </td>
-            <td id="price-{{cart.id}}" class="tot-price">{{cart.total_price}}</td>
+            <td id="price-{{cart.id}}" class="tot-price">{{cart.product_total}}</td>
             <td>
                 <a href="/cart/delete/{{cart.id}}" class="delete" title="Delete">
                     <i Onclick="return confirm('Are you sure you want to delete  ?')" class="fa fa-trash text-danger"></i>
@@ -41,7 +41,7 @@
     </table>
     <div class="float-right mt-4">
         <h4 id="grand-total"></h4>
-        <a href="" class="btn btn-primary">Proceed to Checkout</a>
+        <a href="{% url 'checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
     </div>
 </div>
 <script>
@@ -58,7 +58,7 @@
                 dataType : "json",
                 success: function( body ){
                     $('#qty-'+body.id).html(body.quantity)
-                    $('#price-'+body.id).html(body.total_price)
+                    $('#price-'+body.id).html(body.product_total)
                     cartTotal()
                 }
             });

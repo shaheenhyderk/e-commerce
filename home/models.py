@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from super_admin.models import Product
-from datetime import datetime
 from django.utils import timezone
 
 
@@ -34,10 +33,10 @@ class Order(models.Model):
     address = models.ForeignKey(Address, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
-    total_price = models.IntegerField()
+    product_total = models.IntegerField()
     tid = models.CharField(max_length=50)
     date = models.DateField(default=timezone.now)
-    payment_done = models.BooleanField()
+    paid = models.BooleanField()
     order_status = models.IntegerField(choices=ORDER_CHOICES)
     payment_mode = models.IntegerField(choices=PAYMENT_CHOICES)
 
@@ -48,5 +47,5 @@ class Cart(models.Model):
     quantity = models.IntegerField()
 
     @property
-    def total_price(self):
+    def product_total(self):
         return self.product.price * self.quantity
