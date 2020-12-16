@@ -83,7 +83,7 @@
           $("#error").html("Please enter password");
         } else {
           $.ajax({
-            url: "/admin/login/",
+            url: "{% url 'admin_login' %}",
             type: "POST",
             data: data,
             dataType: "json",

@@ -43,25 +43,31 @@
 
         <!-- Nav Item -->
         <li class="nav-item">
-            <a class="nav-link collapsed" href="/admin/options/">
+            <a class="nav-link collapsed" href="{% url 'admin_options' %}">
                 <i class="fa fa-cog"></i>
                 <span>Options</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link collapsed" href="/admin/products/">
+            <a class="nav-link collapsed" href="{% url 'admin_products' %}">
                 <i class="fa fa-wrench"></i>
                 <span>Products</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link collapsed" href="/admin/users/">
+            <a class="nav-link collapsed" href="{% url 'admin_users' %}">
                 <i class="fa fa-wrench"></i>
                 <span>Users</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link collapsed" href="/admin/logout/">
+            <a class="nav-link collapsed" href="{% url 'admin_orders' %}">
+                <i class="fa fa-wrench"></i>
+                <span>Orders</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{% url 'admin_logout' %}">
                 <i class="fa fa-wrench"></i>
                 <span>Logout</span>
             </a>

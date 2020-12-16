@@ -1,0 +1,71 @@
+{% extends 'super_admin/base.html' %}
+
+{% block title %}Laptops Here - Orders {% endblock %}
+
+{% block content %}
+<div class="d-inline">
+    <h3 class="float-left">Orders</h3>
+</div>
+<div class="mt-5">
+    <table id="user-table" class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>User</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Address</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Payment Mode</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for order in orders %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{order.user.first_name}}</td>
+            <td>{{order.product.name}}</td>
+            <td>{{order.quantity}}</td>
+            <td>{{order.address.address}}</td>
+            <td>{{order.product_total}}</td>
+            <td>{{order.date}}</td>
+            <td>
+                <select onchange="changeStatus(this,'{{order.id}}')">
+                    {% for value, status_name in order_statuses %}
+                    <option value="{{value}}" {% if value == order.order_status %}selected{% endif %}>{{status_name}}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>{{order.get_payment_mode_display}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+    $(document).ready(function() {
+     $('#user-table').DataTable();
+    });
+
+    function changeStatus(self, id){
+        var data = {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            statusValue : self.value
+            }
+        $.ajax({
+            url : '/admin/orders/change-order-status/'+id,
+            type: "POST",
+            data : data,
+            dataType : "json",
+            success: function(body){
+                if (body.status == 'success'){
+                    window.location.replace("/")
+                }
+            }
+        });
+    }
+
+</script>
+{% endblock %}

@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import Processor, Brand, Category, Ram, Storage, Product
+from home.models import Order
 from django.contrib.auth.models import User, auth
 from django.http import JsonResponse
 import base64
@@ -59,7 +60,7 @@ def create_product(request):
         ram_id = request.POST['ram']
         storage_id = request.POST['storage']
         image_data = request.POST['image_base64']
-        if image_data is not '':
+        if image_data != '':
             format, img_str = image_data.split(';base64,')
             ext = format.split('/')[-1]
             image = ContentFile(base64.b64decode(img_str), name=name + '.' + ext)
@@ -88,7 +89,7 @@ def edit_product(request, id):
         product.storage_id = request.POST['storage']
         image_data = request.POST['image_base64']
 
-        if image_data is not '':
+        if image_data != '':
             format, img_str = image_data.split(';base64,')
             ext = format.split('/')[-1]
             product.image = ContentFile(base64.b64decode(img_str), name=product.name + '.' + ext)
@@ -263,3 +264,22 @@ def get_users(request):
     users = User.objects.filter(is_superuser=False)
     context = {"users": users}
     return render(request, 'super_admin/users.html', context)
+
+
+def get_orders(request):
+    if 'isAdmin' not in request.session:
+        return redirect(login)
+    orders = Order.objects.all()
+    order_statuses = Order.ORDER_CHOICES
+    context = {"orders": orders, "order_statuses": order_statuses}
+    return render(request, 'super_admin/orders.html', context)
+
+
+def change_order_status(request, id):
+    if 'isAdmin' not in request.session:
+        return redirect(login)
+    if request.method == 'POST':
+        status_value = int(request.POST['statusValue'])
+        Order.objects.filter(id=id).update(order_status=status_value)
+        data = {'status': 'done'}
+        return JsonResponse(data=data)
